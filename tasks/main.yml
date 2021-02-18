@@ -1,0 +1,28 @@
+---
+- name: Run checks on new pull requests to master
+  block:
+    - include_tasks: "{{ item }}"
+      loop: "{{ check_tasks }}"
+  any_errors_fatal: true
+  when: >
+    tower_webhook_event_type is defined and
+    tower_webhook_event_type == "pull_request" and
+    tower_webhook_payload is defined and
+    tower_webhook_payload.action is defined and
+    tower_webhook_payload.action in ["opened", "reopened", "synchronize"] and
+    tower_webhook_payload.pull_request is defined and
+    tower_webhook_payload.pull_request.base is defined and
+    tower_webhook_payload.pull_request.base.ref is defined and
+    tower_webhook_payload.pull_request.base.ref == deploy_branch
+
+- name: Run deployment on pushes to master
+  block:
+    - include_tasks: "{{ item }}"
+      loop: "{{ deploy_tasks }}"
+  any_errors_fatal: true
+  when: >
+    tower_webhook_event_type is defined and
+    tower_webhook_event_type == "push" and
+    tower_webhook_payload is defined and
+    tower_webhook_payload.ref is defined and
+    tower_webhook_payload.ref == "refs/heads/" + deploy_branch

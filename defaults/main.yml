@@ -1,0 +1,4 @@
+---
+deploy_branch: "master"
+check_tasks: []
+deploy_tasks: []
